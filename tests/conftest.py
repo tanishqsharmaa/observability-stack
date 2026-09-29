@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.fixture
 def sample_trace_payload():
     return {
