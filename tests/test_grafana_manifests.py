@@ -40,3 +40,15 @@ def test_grafana_deployment_and_service():
 
     assert dep["spec"]["template"]["spec"]["containers"][0]["resources"]["limits"]["memory"] == "256Mi"
     assert svc["spec"]["ports"][0]["port"] == 3000
+
+
+def test_grafana_dashboards_configmap():
+    path = Path("k8s/observability/grafana-dashboards-configmap.yaml")
+    assert path.exists(), "grafana-dashboards-configmap.yaml missing"
+    docs = list(yaml.safe_load_all(path.read_text(encoding="utf-8")))
+    cm = next(d for d in docs if d["kind"] == "ConfigMap")
+    assert cm["metadata"]["namespace"] == "warden-observability"
+    assert "warden-sla-overview.json" in cm["data"]
+    raw_json = cm["data"]["warden-sla-overview.json"]
+    parsed = json.loads(raw_json)
+    assert parsed["title"] == "Project Warden — Master SLA & Operational Overview"
